@@ -19,10 +19,10 @@ metadata:
         containers:
           - name: vprodb
 # container image from docker hub @ containerization
-            image: vprofile/vprofiledb:V1
+            image: vprofile/vprofiledb
 #            ARGS ignores the POD from throwing error that the DB is not empty.
             args:
-              - "ignore-db-dir=lost+found"
+              - "--ignore-db-dir=lost+found"
 #           VOLUME MOUNTING
             volumeMounts:
               mountPath: /var/lib/mysql
