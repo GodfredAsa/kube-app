@@ -1,55 +1,96 @@
-apiVersion: api/v1
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: vprodb
+#  labels:
+##    vprodb here is going to for service definition file hence will create service of type cluster ip
+##    and the service will route the request to any POD with this vprodb label. that's database service
+#    app: vprodb
+#spec:
+#  selector:
+#    metaLabels:
+#      app: voprodb
+#  replica: 1
+#  template:
+#    metadata:
+#      labels:
+#        app: vprodb
+#    spec:
+#      containers:
+#        - name: vprodb
+##          image: degreatasaa/vprofile-db:V1
+## container image from docker hub @ containerization
+#          image: degreatasaa/vprofile-db:V1
+##            ARGS ignores the POD from throwing error that the DB is not empty.
+#          args:
+#              - "--ignore-db-dir=lost+found"
+###           VOLUME MOUNTING
+#          volumeMounts:
+#              mountPath: /var/lib/mysql
+#              name: vpro-db-data
+#          ports:
+#            - name: vprodb-port
+#              containerPort: 3306
+#          env:
+#            - name: MYSQL_ROOT_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+##   in secret definition file name used under metadata
+#                  name: app-secret
+#                  key: db-pass
+#      nodeSelector:
+#        zone: us-east-1a
+##      VOLUME CREATION
+#      volumes:
+#        - name: vpro-db-data
+#          awsElasticBlockStore:
+##              volume id created in when creating the clusters, can be verified
+##               @ AWS Cloud Console ec2 at ElasticBlockStore - volumes by matching the volumeID.
+#              volumeID: vol-06b55f9408c4b5cbd
+## NB To avoid permission denied find the volume, attach a tag, Tag Key anything descriptive
+## Ensure tag Value is ClusterName when creating the cluster in this lesson mine was kubevpro.decodingdevops.co.uk
+#              fsType: ext4
+#
+#
+#
+#
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: vprodb
   labels:
-#    vprodb here is going to for service definition file hence will create service of type cluster ip
-#    and the service will route the request to any POD with this vprodb label. that's database service
     app: vprodb
-  spec:
-    selector:
-      metaLabels:
-        app: voprodb
-    replica: 1
-    template:
-      metadata:
-        labels:
-          app: vprodb
-      spec:
-        containers:
-          - name: vprodb
-# container image from docker hub @ containerization
-            image: degreatasaa/vprofile-db:V1
-#            ARGS ignores the POD from throwing error that the DB is not empty.
-            args:
-              - "--ignore-db-dir=lost+found"
-#           VOLUME MOUNTING
-            volumeMounts:
-              mountPath: /var/lib/mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vprodb
+  template:
+    metadata:
+      labels:
+        app: vprodb
+    spec:
+      containers:
+        - name: vprodb
+          image: degreatasaa/vprofile-db:V1
+          args:
+            - "--ignore-db-dir=lost+found"
+          volumeMounts:
+            - mountPath: /var/lib/mysql
               name: vpro-db-data
-            ports:
-              - name: vprodb-port
-                containerPort: 3306
-            env:
-              - name: MYSQL_ROOT_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-#   in secret definition file name used under metadata
-                    name: app-secret
-                    key: db-pass
-        nodeSelector:
-          zone: us-east-1a
-#      VOLUME CREATION
-        volumes:
-          - name: vpro-db-data
-            awsElasticBlockStore:
-#              volume id created in when creating the clusters, can be verified
-#               @ AWS Cloud Console ec2 at ElasticBlockStore - volumes by matching the volumeID.
-              volumeID: vol-06b55f9408c4b5cbd
-# NB To avoid permission denied find the volume, attach a tag, Tag Key anything descriptive
-# Ensure tag Value is ClusterName when creating the cluster in this lesson mine was kubevpro.decodingdevops.co.uk
-              fsType: ext4
-
-
-
-
+          ports:
+            - name: vprodb-port
+              containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: db-pass
+      nodeSelector:
+        zone: us-east-1a
+      volumes:
+        - name: vpro-db-data
+          awsElasticBlockStore:
+            volumeID: vol-06b55f9408c4b5cbd
+            fsType: ext4
