@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vproapp
+  labels:
+    app: vproapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vproapp
+  template:
+    metadata:
+      labels:
+        app: vproapp
+    spec:
+      containers:
+        - name: vproapp
+          image: degreatasaa/vprofile-app
+          ports:
+            - name: vproapp-port
+              containerPort: 8080
+#  dependencies  when done that's when the app container will be launched
+      initContainers:
+        - name: init-mydb
+#          wants to execute shell script from busybox
+          image: busybox
+          command: ['sh', '-c', 'until nslookup vprodb; do echo waiting for mydb; sleep 2; done;']
+
+        - name: init-memcache
+          image: busybox
+          command: ['sh', '-c', 'until nslookup vproche01; do echo waiting for mydb; sleep 2; done;']
+
